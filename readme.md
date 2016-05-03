@@ -1,7 +1,7 @@
 Project overview
 ========
 
-[![Build Status](https://travis-ci.com/stefanogianelli/camus.svg?token=efsduJeDxrmWMeSyeDHM&branch=master)](https://travis-ci.com/stefanogianelli/camus)
+[![Build Status](https://travis-ci.org/stefanogianelli/camus-server.svg?branch=master)](https://travis-ci.org/stefanogianelli/camus-server)
 
 CAMUS is a framework to allow creation of context-aware mashups. This repository provide the server's implementation of CAMUS prototype. It's used by the mobile app to perform contextual searches, starting from the user's situation. The server parse the context received by the application, then select the services that best fit this situation, based on pre-created rules. Once services are selected, they will be queried to acquire data to be sent to the client, after last steps of transformation and duplicates' cleaning.
 
@@ -48,7 +48,7 @@ Then run the container:
 To get the docker machine's ip address execute the command:
 
     docker-machine ls
-    
+
 Note: get only the ip address becuase the mapped port for CAMUS remain 3001.
 
 For the first run assure to create the entries in the database using the /createDatabase endpoint
@@ -56,7 +56,7 @@ For the first run assure to create the entries in the database using the /create
 Note for MAC OS X users: if you get the error message:
 
     Couldn't connect to Docker daemon - you might need to run `docker-machine start default`.
-    
+
 execute first:
 
     eval "$(docker-machine env default)"
@@ -91,5 +91,5 @@ Database Creator Tool
 Tool to populate the database with sample data. This tool is not pushed to git due to private API keys in it. To load data in the database execute command:
 
     node databaseCreator.js
-    
+
 This will first delete all the existent tables then recreate them from scratch.

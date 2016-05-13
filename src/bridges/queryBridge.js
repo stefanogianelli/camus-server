@@ -3,6 +3,6 @@
 import AbsBridge from './abstractRestQueryBridge'
 
 /**
- * Bridge for rest type
+ * Bridge for query type
  */
 export default class extends AbsBridge {}

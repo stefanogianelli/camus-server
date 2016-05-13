@@ -1,6 +1,5 @@
 # Logs
 logs
-*.log
 npm-debug.log*
 
 # Runtime data
@@ -34,7 +33,6 @@ node_modules
 .node_repl_history
 
 .idea
-.DS_Store
 metrics
 
 # database creator tool

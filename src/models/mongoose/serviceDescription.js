@@ -7,7 +7,6 @@ const ObjectId = Schema.Types.ObjectId
 
 const types = 'primary support'.split(' ')
 const separators = 'csv ssv tsv pipes'.split(' ')
-const protocols = 'rest query android custom'.split(' ')
 const paginationTypes = 'number token'.split(' ')
 
 /**
@@ -134,10 +133,6 @@ const operationSchema = new Schema({
         enum: types
     },
     description: String,
-    protocol: {
-        type: String,
-        enum: protocols
-    },
     path: String,
     storeLink: String,
     bridgeName: String,
@@ -156,9 +151,9 @@ const serviceDescriptionSchema = new Schema({
         required: true
     },
     description: String,
-    protocol: {
+    bridgeName: {
         type: String,
-        enum: protocols
+        required: true
     },
     basePath: String
 })

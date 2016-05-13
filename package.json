@@ -10,8 +10,7 @@
     "startMocha": "NODE_ENV=testing ./node_modules/.bin/babel-node ./node_modules/.bin/_mocha",
     "startIstanbul": "NODE_ENV=testing ./node_modules/.bin/babel-node ./node_modules/.bin/isparta cover _mocha",
     "startServices": "pm2 -s start ./mockServices/startServices.js",
-    "stopServices": "pm2 -s stop all",
-    "deploy": "git push heroku master && curl https://camus-poli.herokuapp.com/createDatabase"
+    "stopServices": "pm2 -s stop all"
   },
   "repository": {
     "type": "git",
@@ -42,9 +41,8 @@
     "natural": "^0.4.0",
     "newrelic": "^1.26.2",
     "object-hash": "^1.1.2",
-    "superagent": "^1.8.3",
-    "systemjs": "^0.19.26",
-    "traceur": "0.0.107"
+    "require-all": "^2.0.0",
+    "superagent": "^1.8.3"
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
@@ -52,6 +50,6 @@
     "istanbul": "^0.4.3",
     "json-server": "^0.8.9",
     "mocha": "^2.4.5",
-    "shelljs": "^0.6.0"
+    "shelljs": "^0.7.0"
   }
 }

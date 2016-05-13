@@ -45,18 +45,6 @@ describe('Component: QueryHandler', () => {
                     assert.equal(responses.results.length, 30)
                 })
         })
-        it('check correct execution of custom bridge', () => {
-            return serviceManager
-                .selectServices(testBridgeContext(_idCDT))
-                .then(function(services) {
-                    return queryHandler.executeQueries(services, testBridgeContext(_idCDT))
-                })
-                .then(responses => {
-                    assert.equal(responses.results.length, 2)
-                    assert.equal(responses.results[0].title, 'Restaurant Girl & the Goat')
-                    assert.equal(responses.results[1].title, 'Restaurant The Purple Pig')
-                })
-        })
     })
 
     after(done => {
@@ -102,20 +90,6 @@ const contextForFakeService = idCDT => {
             {
                 name: 'SearchKey',
                 value: 'restaurantinnewyork'
-            }
-        ]
-    }
-}
-
-//context for test the correct execution of custom bridge
-const testBridgeContext = idCDT => {
-    return {
-        _id: idCDT,
-        interestTopic: 'Restaurant',
-        filterNodes: [
-            {
-                name: 'TestBridge',
-                value: 'TestBridge'
             }
         ]
     }

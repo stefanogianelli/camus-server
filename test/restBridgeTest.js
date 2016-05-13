@@ -2,7 +2,7 @@
 
 import assert from 'assert'
 
-import RestBridge from '../src/bridges/restBridge'
+import RestBridge from '../src/bridges/abstractRestQueryBridge'
 import * as mockModel from './mockModel'
 
 const restBridge = new RestBridge()
@@ -58,7 +58,7 @@ const eventful = {
     service: {
         name: 'Eventful',
         type: 'primary',
-        protocol: 'rest',
+        bridgeName: 'rest',
         basePath: 'http://localhost:3000/json'
     },
     name: 'eventSearch',
@@ -119,7 +119,7 @@ const noDefaultParameterService = {
     service: {
         name: 'eventful',
         type: 'primary',
-        protocol: 'rest',
+        bridgeName: 'rest',
         basePath: 'http://localhost:3000/json'
     },
     name: 'eventSearch',
@@ -174,7 +174,7 @@ const noValueParameterService = {
     service: {
         name: 'eventful',
         type: 'primary',
-        protocol: 'rest',
+        bridgeName: 'rest',
         basePath: 'http://localhost:3000/json'
     },
     name: 'eventSearch',
@@ -230,7 +230,7 @@ const wrongBasePath = {
     service: {
         name: 'eventful',
         type: 'primary',
-        protocol: 'rest',
+        bridgeName: 'rest',
         basePath: 'http://localhost:3000'
     },
     name: 'eventSearch',
@@ -281,26 +281,3 @@ const wrongBasePath = {
         ]
     }
 }
-
-const simpleParameters = [
-    {
-        name: 'CityName',
-        value: 'Milan'
-    }
-]
-
-const compositeParameters = [
-    {
-        name: 'CityCoord',
-        fields: [
-            {
-                name: 'Longitude',
-                value: '9.234297'
-            },
-            {
-                name: 'Latitude',
-                value: '45.478906'
-            }
-        ]
-    }
-]

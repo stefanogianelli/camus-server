@@ -2,7 +2,7 @@
 
 import assert from 'assert'
 
-import Bridge from '../src/bridges/bridge'
+import Bridge from '../src/bridges/bridgeInterface'
 
 describe('Component: Bridge', () => {
 
@@ -18,7 +18,7 @@ describe('Component: Bridge', () => {
             try {
                 const b = new InvalidBridge()
             } catch (e) {
-                assert.equal(e.message, 'A bridge must implements executeQuery() method')
+                assert.equal(e.message, 'A bridge must implements executeQuery() method. See documentation for more details')
             }
         })
     })

@@ -14,13 +14,13 @@ export function composeAddress (descriptor, decoratedCdt, pageInfo) {
     //object for query symbols parameters
     let querySymbols = {}
     //check if the current operation override the service protocol
-    if (!_.isUndefined(descriptor.protocol)) {
+    if (!_.isUndefined(descriptor.bridgeName)) {
         //use the operation protocol
-        querySymbols = _configureQuerySymbol(descriptor.protocol)
+        querySymbols = _configureQuerySymbol(descriptor.bridgeName)
     }
     else {
         //use the service protocol information
-        querySymbols = _configureQuerySymbol(descriptor.service.protocol)
+        querySymbols = _configureQuerySymbol(descriptor.service.bridgeName)
     }
     //setting up the base path of the service
     const baseAddress = (_.isUndefined(descriptor.service.basePath) ? '' : descriptor.service.basePath) + descriptor.path
@@ -184,12 +184,6 @@ function _translateValue (value, rules) {
  */
 function _configureQuerySymbol (type) {
     switch (type) {
-        case 'query':
-            return {
-                start: '?',
-                assign: '=',
-                separator: '&'
-            }
         case 'rest':
             return {
                 start: '/',
@@ -199,6 +193,12 @@ function _configureQuerySymbol (type) {
         case 'android':
             return {
                 start: ':',
+                assign: '=',
+                separator: '&'
+            }
+        default:
+            return {
+                start: '?',
                 assign: '=',
                 separator: '&'
             }

@@ -17,7 +17,6 @@ import QueryHandler from './queryHandler'
 import SupportService from './supportServiceSelection'
 import ResponseAggregator from './responseAggregator'
 import UserManager from './userManager'
-import Metrics from '../utils/MetricsUtils'
 import Provider from '../provider/provider'
 import SessionHelper from './sessionHelper'
 
@@ -31,16 +30,6 @@ const sessionHelper = new SessionHelper(queryHandler, responseAggregator)
 const provider = Provider.getInstance()
 
 const ObjectId = mongoose.Types.ObjectId
-
-let metricsFlag = false
-if (config.has('metrics')) {
-    metricsFlag = config.get('metrics')
-}
-
-let metrics = null
-if (metricsFlag) {
-    metrics = Metrics.getInstance()
-}
 
 let timer = null
 
@@ -62,10 +51,6 @@ if (config.has('paginationTTL')) {
  * }
  */
 export function getDecoratedCdt (userMail, context) {
-    const start = process.hrtime()
-    if (metricsFlag) {
-        timer = _startTimer()
-    }
     //check if the current context exists in cache
     const contextHash = objectHash.sha1(context)
     return provider
@@ -95,11 +80,6 @@ export function getDecoratedCdt (userMail, context) {
                     }
                 })
         })
-        .finally(() => {
-            if (metricsFlag) {
-                metrics.record('ExecutionHelper', 'getDecoratedCdt', 'MAIN', start)
-            }
-        })
 }
 
 /**
@@ -112,7 +92,6 @@ export function getDecoratedCdt (userMail, context) {
  * @returns {Promise<Array>} The list of items found
  */
 export function getPrimaryData (userMail, contextHash, decoratedCdt, paginationArgs, connectionId) {
-    const start = process.hrtime()
     //check if the necessary data are available in cache
     return provider
         .getRedisValue(contextHash)
@@ -174,11 +153,6 @@ export function getPrimaryData (userMail, contextHash, decoratedCdt, paginationA
                     return response.results
                 })
         })
-        .finally(() => {
-            if (metricsFlag) {
-                metrics.record('ExecutionHelper', 'getPrimaryData', 'MAIN', start)
-            }
-        })
 }
 
 /**
@@ -187,14 +161,7 @@ export function getPrimaryData (userMail, contextHash, decoratedCdt, paginationA
  * @returns {Promise<Array>} The list of support services found
  */
 export function getSupportData (decoratedCdt) {
-    const start = process.hrtime()
-    return supportService
-        .selectServices(decoratedCdt)
-        .finally(() => {
-            if (metricsFlag) {
-                metrics.record('ExecutionHelper', 'getSupportData', 'MAIN', start)
-            }
-        })
+    return supportService.selectServices(decoratedCdt)
 }
 
 /**
@@ -204,9 +171,6 @@ export function getSupportData (decoratedCdt) {
  * @returns {Promise<Object>} The user's identifier and session token
  */
 export function login (mail, password) {
-    if (metricsFlag) {
-        timer = _startTimer()
-    }
     return userManager.login(mail, password)
 }
 
@@ -218,20 +182,5 @@ export function login (mail, password) {
  * @returns {Promise<Object>} The CDT associated to the user
  */
 export function getPersonalData (mail, token) {
-    if (metricsFlag) {
-        timer = _startTimer()
-    }
     return userManager.getPersonalData(mail, token)
-}
-
-/**
- * Start the timer for saving the metrics results
- * @returns {Object} The timeout object
- * @private
- */
-function _startTimer () {
-    clearTimeout(timer)
-    return setTimeout(() => {
-        metrics.saveResults()
-    }, 4000)
 }

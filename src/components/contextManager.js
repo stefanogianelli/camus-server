@@ -5,7 +5,6 @@ import Promise from 'bluebird'
 import config from 'config'
 
 import Provider from '../provider/provider'
-import Metrics from '../utils/MetricsUtils'
 
 /**
  * The Context Manager receive the user's context and transform it in a 'decorated' version, more suitable for the next elaborations
@@ -15,15 +14,6 @@ export default class {
     constructor () {
         //initialize provider
         this._provider = Provider.getInstance()
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
     }
 
     /**
@@ -39,7 +29,6 @@ export default class {
      * @returns {Promise<Object>} The decorated CDT
      */
     getDecoratedCdt (context) {
-        const startTime = process.hrtime()
         return this
             //merge the CDT full description with the values from the user's context
             ._mergeCdtAndContext(context)
@@ -66,11 +55,6 @@ export default class {
                         }
                     )
             })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('ContextManager', 'getDecoratedCdt', 'MAIN', startTime)
-                }
-            })
     }
 
     /**
@@ -81,13 +65,9 @@ export default class {
      * @private
      */
     _mergeCdtAndContext (context) {
-        const startTime = process.hrtime()
         return this._provider
             .getCdtById(context.idCdt)
             .then(cdt => {
-                if (this._metricsFlag) {
-                    this._metrics.record('ContextManager', 'getCdt', 'MAINDB', startTime)
-                }
                 //create the map of user context values
                 let mapContext = this._createMap(context.context)
                 //merging the CDT description with the user context
@@ -101,11 +81,6 @@ export default class {
                     mergedCdt.support = context.support
                 }
                 return {cdt, mergedCdt}
-            })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('ContextManager', 'mergeCdtAndContext', 'FUN', startTime)
-                }
             })
     }
 
@@ -214,13 +189,9 @@ export default class {
      * @private
      */
     _getFilterNodes (mergedCdt, cdt) {
-        const startTime = process.hrtime()
         let results = this._getNodes('filter', mergedCdt, false)
         if (!_.isEmpty(results)) {
             results = _.concat(results, this._getDescendants(cdt, results))
-        }
-        if (this._metricsFlag) {
-            this._metrics.record('ContextManager', 'getFilterNodes', 'FUN', startTime)
         }
         return results
     }
@@ -233,13 +204,9 @@ export default class {
      * @private
      */
     _getRankingNodes (mergedCdt, cdt) {
-        const startTime = process.hrtime()
         let results = this._getNodes('ranking', mergedCdt, false)
         if (!_.isEmpty(results)) {
             results = _.concat(results, this._getDescendants(cdt, results))
-        }
-        if (this._metricsFlag) {
-            this._metrics.record('ContextManager', 'getRankingNodes', 'FUN', startTime)
         }
         return results
     }
@@ -251,15 +218,10 @@ export default class {
      * @private
      */
     _getParameterNodes (mergedCdt) {
-        const startTime = process.hrtime()
-        let results = _.concat(
+        return _.concat(
             this._getNodes('parameter', mergedCdt, false),
             this._getNodes('parameter', mergedCdt, true)
         )
-        if (this._metricsFlag) {
-            this._metrics.record('ContextManager', 'getParameterNodes', 'FUN', startTime)
-        }
-        return results
     }
 
     /**
@@ -270,12 +232,7 @@ export default class {
      * @private
      */
     _getSpecificNodes (mergedCdt) {
-        const startTime = process.hrtime()
-        let results = this._getNodes('ranking', mergedCdt, true)
-        if (this._metricsFlag) {
-            this._metrics.record('ContextManager', 'getSpecificNodes', 'FUN', startTime)
-        }
-        return results
+        return this._getNodes('ranking', mergedCdt, true)
     }
 
     /**
@@ -356,7 +313,6 @@ export default class {
      * @private
      */
     _getDescendants (cdt, nodes) {
-        const startTime = process.hrtime()
         let output = []
         const nodeValues = _(nodes).map('value').value()
         _(cdt.context).forEach(item => {
@@ -370,9 +326,6 @@ export default class {
                 })
             }
         })
-        if (this._metricsFlag) {
-            this._metrics.record('ContextManager', 'getDescendants', 'FUN', startTime)
-        }
         return output
     }
 }

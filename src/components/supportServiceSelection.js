@@ -5,7 +5,6 @@ import Promise from 'bluebird'
 import config from 'config'
 
 import Provider from '../provider/provider'
-import Metrics from '../utils/MetricsUtils'
 import * as Composer from '../utils/QueryComposer'
 
 /**
@@ -16,15 +15,6 @@ export default class {
     constructor () {
         //initialize provider
         this._provider = Provider.getInstance()
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
     }
 
     /**
@@ -33,17 +23,11 @@ export default class {
      * @returns {Promise<Array>} The list of URLs for the support services or intents
      */
     selectServices (decoratedCdt) {
-        const startTime = process.hrtime()
         return this
             ._selectServiceFromCategory(decoratedCdt.supportServiceCategories, decoratedCdt)
             .catch(err => {
                 console.log('[ERROR] ' + err)
                 return []
-            })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('SupportServiceSelection', 'selectServices', 'MAIN', startTime)
-                }
             })
     }
 
@@ -55,7 +39,6 @@ export default class {
      * @private
      */
     _selectServiceFromCategory (categories, decoratedCdt) {
-        const start = process.hrtime()
         if (!_.isUndefined(categories) && !_.isEmpty(categories) && !_.isEmpty(decoratedCdt.filterNodes)) {
             let nodes = decoratedCdt.filterNodes
             if (!_.isEmpty(decoratedCdt.rankingNodes)) {
@@ -68,9 +51,6 @@ export default class {
                             this._provider.filterSupportServices(decoratedCdt._id, c, nodes),
                             this._specificSearch(decoratedCdt._id, decoratedCdt.specificNodes),
                             (filterServices, customServices) => {
-                                if (this._metricsFlag) {
-                                    this._metrics.record('SupportServiceSelection', 'getAssociations', 'DB', start)
-                                }
                                 //check if some associations are found
                                 if (!_.isEmpty(filterServices) || !_.isEmpty(customServices)) {
                                     //acquire constraint count information
@@ -116,7 +96,6 @@ export default class {
      * @private
      */
     _mergeResults (filterServices, customServices, constraintCount) {
-        const start = process.hrtime()
         let results = []
         _(filterServices)
             .concat(customServices)
@@ -156,9 +135,6 @@ export default class {
             .orderBy('count', 'desc')
             .map('_idOperation')
             .value()
-        if (this._metricsFlag) {
-            this._metrics.record('SupportServiceSelection', 'mergeResults', 'FUN', start)
-        }
         return relaxedResults
     }
 

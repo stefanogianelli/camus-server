@@ -25,6 +25,5 @@
     "threshold": 0.85
   },
   "paginationTTL": 1800,
-  "debug": true,
-  "metrics": true
+  "debug": true
 }

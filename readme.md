@@ -88,8 +88,11 @@ The available endpoint is:
 Database Creator Tool
 =====================
 
-Tool to populate the database with sample data. This tool is not pushed to git due to private API keys in it. To load data in the database execute command:
+Tool to populate the database with sample data. This tool is not pushed to git due to private API keys in it. To load data in the database first copy the two files with code in source directory of the project, then execute command:
 
     node databaseCreator.js
 
 This will first delete all the existent tables then recreate them from scratch.
+Database address can be changed in two ways:
+* with the configuration file, in path `database.address`
+* with the environment variable `MONGO_URI` or `MONGOLAB_URI`

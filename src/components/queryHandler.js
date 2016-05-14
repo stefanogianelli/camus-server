@@ -7,7 +7,6 @@ import loader from 'require-all'
 
 import Provider from '../provider/provider'
 import ResponseParser from './responseParser'
-import Metrics from '../utils/MetricsUtils'
 
 /**
  * The Query Handler receives the list of services to be queried and call the most appropriate bridge to complete this task.
@@ -26,15 +25,6 @@ export default class {
             filter: /(.+Bridge)\.js$/,
             map: name => name.replace('Bridge', '')
         })
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
     }
 
     /**
@@ -53,13 +43,9 @@ export default class {
         if (_.isEmpty(services)) {
             return Promise.resolve()
         }
-        const startTime = process.hrtime()
         return this._provider
             .getServicesByOperationIds(_.map(services, '_idOperation'))
             .map(service => {
-                if (this._metricsFlag) {
-                    this._metrics.record('QueryHandler', 'getDescriptions', 'MAINDB', startTime)
-                }
                 //add the ranking value
                 service.service.rank = _(services).find(s => service._id.equals(s._idOperation)).rank
                 //make call to the current service
@@ -78,11 +64,6 @@ export default class {
                         output.results = _.concat(output.results, item.response)
                 })
                 return output
-            })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('QueryHandler', 'executeQueries', 'MAIN', startTime)
-                }
             })
     }
 
@@ -103,7 +84,6 @@ export default class {
      * @private
      */
     _callService (descriptor, decoratedCdt, paginationStatus) {
-        const start = process.hrtime()
         //get the pagination configuration for the current service
         const servicePaginationConfig = _(paginationStatus).find(s => descriptor._id.equals(s._idOperation))
         let startPage = undefined
@@ -124,9 +104,6 @@ export default class {
             const bridgeInstance = new bridge.default()
             return bridgeInstance.executeQuery(descriptor, decoratedCdt, {startPage})
                 .then(response => {
-                    if (this._metricsFlag) {
-                        this._metrics.record('QueryHandler', 'bridgeExecution', 'EXT', start)
-                    }
                     //transform the response
                     return [response, this._responseParser.mappingResponse(response.response, descriptor)]
                 }).spread((response, mappedResponse) => {

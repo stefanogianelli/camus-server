@@ -8,8 +8,6 @@ import {
     DiceCoefficient
 } from 'natural'
 
-import Metrics from '../utils/MetricsUtils'
-
 /**
  * This class performs the necessary operations on the information received by the services. In particular two tasks are involved:
  * 1) duplicate detection: check the dataset to search duplicate entities. If some duplicates are found they will be merged in a unique item
@@ -27,15 +25,6 @@ export default class {
         this._debug = false
         if (config.has('debug')) {
             this._debug = config.get('debug')
-        }
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
         }
     }
 
@@ -64,7 +53,6 @@ export default class {
      * @private
      */
     _findSimilarities (items) {
-        const startTime = process.hrtime()
         //create a map of items that sounds similar (using SoundEx algorithm)
         let clusters = new Map()
         _(items).forEach(item => {
@@ -119,9 +107,6 @@ export default class {
                 output.push(items[0])
             }
         })
-        if (this._metricsFlag) {
-            this._metrics.record('ResponseAggregator', 'findSimilarities', 'MAIN', startTime)
-        }
         return output
     }
 

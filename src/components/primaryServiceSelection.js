@@ -5,7 +5,6 @@ import Promise from 'bluebird'
 import config from 'config'
 
 import Provider from '../provider/provider'
-import Metrics from '../utils/MetricsUtils'
 
 /**
  * This component choose the most appropriate primary operations to be queried to retrieve the data
@@ -19,15 +18,6 @@ export default class  {
         this._debug = false
         if (config.has('debug')) {
             this._debug = config.get('debug')
-        }
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
         }
         //number of services to keep
         this._n = 3
@@ -52,7 +42,6 @@ export default class  {
      * @returns {Promise<Array>} The ordered operations id with their ranking value
      */
     selectServices (decoratedCdt) {
-        const startTime = process.hrtime()
         return new Promise(resolve => {
             Promise
                 .join(
@@ -63,9 +52,6 @@ export default class  {
                     //search for specific associations
                     this._specificSearch(decoratedCdt._id, decoratedCdt.specificNodes)
                 ,(filter, ranking, specific) => {
-                    if (this._metricsFlag) {
-                        this._metrics.record('PrimaryServiceSelection', 'getAssociations', 'MAINDB', startTime)
-                    }
                     //merge the ranking and specific list (specific searches are considered ranking)
                     //discard the ranking nodes that haven't a correspondence in the filter nodes list
                     ranking = _(ranking)
@@ -86,11 +72,6 @@ export default class  {
                     console.log('[ERROR]' + e)
                     resolve([])
                 })
-                .finally(() => {
-                    if (this._metricsFlag) {
-                        this._metrics.record('PrimaryServiceSelection', 'selectServices', 'MAIN', startTime)
-                    }
-                })
         })
     }
 
@@ -103,7 +84,6 @@ export default class  {
      * @private
      */
     _specificSearch (idCdt, nodes) {
-        const start = process.hrtime()
         let promises = []
         //check if the node dimension have a specific search associated
         _(nodes).forEach(node => {
@@ -123,11 +103,6 @@ export default class  {
                 console.log(e)
                 return []
             })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('PrimaryServiceSelection', 'specificSearches', 'FUN', start)
-                }
-            })
     }
 
     /**
@@ -140,7 +115,6 @@ export default class  {
         if (this._debug) {
             console.log('Found ' + services.length + ' association/s')
         }
-        const start = process.hrtime()
         let rankedList = []
         _(services).forEach(s => {
             //calculate the ranking of the current service
@@ -170,9 +144,6 @@ export default class  {
             .orderBy('rank', 'desc')
             .take(this._n)
             .value()
-        if (this._metricsFlag) {
-            this._metrics.record('PrimaryServiceSelection', 'calculateRanking', 'FUN', start)
-        }
         return rankedList
     }
 
@@ -185,13 +156,9 @@ export default class  {
      * @private
      */
     _searchByCoordinates (idCdt, node) {
-        const start = process.hrtime()
         return this._provider
             .searchPrimaryByCoordinates(idCdt, node)
             .then(results => {
-                if (this._metricsFlag) {
-                    this._metrics.record('PrimaryServiceSelection', 'dbCoordinatesSearch', 'DB', start)
-                }
                 if (this._debug) {
                     console.log('Found ' + results.length + ' service/s near the position')
                 }
@@ -201,11 +168,6 @@ export default class  {
                 return {
                     _idOperation: result._idOperation,
                     ranking: index + 1
-                }
-            })
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('PrimaryServiceSelection', 'searchByCoordinates', 'FUN', start)
                 }
             })
     }

@@ -4,24 +4,10 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import config from 'config'
 
-import Metrics from '../utils/MetricsUtils'
-
 /**
- * This class handle the trasformation of the results received from the service in the internal format, based on association with the semantic terms
+ * This class handle the transformation of the results received from the service in the internal format, based on association with the semantic terms
  */
 export default class {
-
-    constructor () {
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
-    }
 
     /**
      * It transforms the response of the service to make it in internal representation
@@ -30,7 +16,6 @@ export default class {
      * @returns {Promise<Array>} The transformed list of items
      */
     mappingResponse (response, descriptor) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (_.isUndefined(response)) {
                 reject('Empty response. Please add a response to be mapped')
@@ -54,9 +39,6 @@ export default class {
                 })
                 //execute custom functions on items (if defined)
                 transformedResponse = this._executeFunctions(transformedResponse, descriptor)
-                if (this._metricsFlag) {
-                    this._metrics.record('TransformResponse', 'mappingResponse', 'MAIN', start)
-                }
                 resolve(transformedResponse)
             } catch (e) {
                 reject(e.message)

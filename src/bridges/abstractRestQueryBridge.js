@@ -7,7 +7,6 @@ import config from 'config'
 
 import Bridge from './bridgeInterface'
 import Provider from '../provider/provider'
-import Metrics from '../utils/MetricsUtils'
 import * as Composer from '../utils/QueryComposer'
 
 /**
@@ -35,15 +34,6 @@ export default class extends Bridge {
         if (config.has('debug')) {
             this._debug = config.get('debug')
         }
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
     }
 
     /**
@@ -56,14 +46,7 @@ export default class extends Bridge {
      * @returns {Promise<Object>} The promise for the service responses. The object format is the same as @see {@link _invokeService} method
      */
     executeQuery (descriptor, decoratedCdt, paginationArgs) {
-        const startTime = process.hrtime()
-        return this
-            ._invokeService(descriptor, decoratedCdt, paginationArgs)
-            .finally(() => {
-                if (this._metricsFlag) {
-                    this._metrics.record('RestBridge', 'executeQuery/' + descriptor.service.name, 'MAIN', startTime)
-                }
-            })
+        return this._invokeService(descriptor, decoratedCdt, paginationArgs)
     }
 
     /**
@@ -81,7 +64,6 @@ export default class extends Bridge {
      * @private
      */
     _invokeService (descriptor, decoratedCdt, pagination) {
-        const start = process.hrtime()
         //acquire pagination parameters
         let startPage = this._getStartPage(descriptor, pagination)
         //get the service address
@@ -99,9 +81,6 @@ export default class extends Bridge {
             .then(response => {
                 //acquire next page information
                 let {hasNextPage, nextPage} = this._getPaginationStatus(descriptor, startPage, response)
-                if (this._metricsFlag) {
-                    this._metrics.record('RestBridge', 'invokeService/' + descriptor.service.name, 'FUN', start)
-                }
                 return {
                     hasNextPage: hasNextPage,
                     nextPage: nextPage,
@@ -119,16 +98,12 @@ export default class extends Bridge {
      * @private
      */
     _makeCall (address, headers, service) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             //check if a copy of the response exists in the cache
             this._provider
                 .getRedisValue(address)
                 .then((result) => {
                     if (result) {
-                        if (this._metricsFlag) {
-                            this._metrics.record('RestBridge', 'accessCache/' + service, 'CACHE', start)
-                        }
                         //return immediately the cached response
                         return resolve(JSON.parse(result))
                     } else {
@@ -169,9 +144,6 @@ export default class extends Bridge {
                                 }
                                 //caching the response (with associated TTL)
                                 this._provider.setRedisValue(address, res.text, this._cacheTTL)
-                                if (this._metricsFlag) {
-                                    this._metrics.record('RestBridge', 'makeCall/' + service, 'EXT', start)
-                                }
                                 return resolve(response)
                             }
                         })
@@ -184,7 +156,7 @@ export default class extends Bridge {
      * Check the pagination status for the current service.
      * The status is composed by the information if another information page is available and what is the identifier to retrieve it.
      * @param {Object} descriptor - The service description
-     * @param {Number} currentPage - The last page queried, used only for 'number' pagination type
+     * @param {String} currentPage - The last page queried, used only for 'number' pagination type
      * @param {Object} response - The last response received by the service
      * @returns {Object} Return the status of the service's query. This object is created as follow:
      * {

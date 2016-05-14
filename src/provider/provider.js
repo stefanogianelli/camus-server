@@ -6,8 +6,6 @@ import Promise from 'bluebird'
 import config from 'config'
 import Redis from 'ioredis'
 
-import Metrics from '../utils/MetricsUtils'
-
 //load the models
 import {
     cdtModel,
@@ -67,15 +65,6 @@ export default class Provider {
         }
         //initialize redis connection
         this._redis = new Redis(this._redisAddress)
-        //initialize metrics utility
-        this._metricsFlag = false
-        if (config.has('metrics')) {
-            this._metricsFlag = config.get('metrics')
-        }
-        this._metrics = null
-        if (this._metricsFlag) {
-            this._metrics = Metrics.getInstance()
-        }
         //radius for the coordinate search
         this._radius = 1500
     }
@@ -104,7 +93,6 @@ export default class Provider {
      * @throws {Error} If the identifier does not exists in the database
      */
     getCdtById (idCDT) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             cdtModel.collection
                 .find({_id: ObjectId(idCDT)})
@@ -114,9 +102,6 @@ export default class Provider {
                         reject(err)
                     }
                     if (results.length === 1) {
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getCdtById', 'DB', start)
-                        }
                         resolve(results[0])
                     } else {
                         reject('No CDT found for the provided identifier')
@@ -131,7 +116,6 @@ export default class Provider {
      * @returns {Promise<Object>} The CDT schema found
      */
     getCdtByUser (userId) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             cdtModel.collection
                 .find({_userId: ObjectId(userId)})
@@ -141,9 +125,6 @@ export default class Provider {
                         reject(err)
                     }
                     if (results.length === 1) {
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getCdtByUser', 'DB', start)
-                        }
                         resolve(results[0])
                     } else {
                         //get the global CDT
@@ -157,9 +138,6 @@ export default class Provider {
                                     reject(err)
                                 }
                                 if (results.length === 1) {
-                                    if (this._metricsFlag) {
-                                        this._metrics.record('Provider', 'getCdtByUser', 'DB', start)
-                                    }
                                     resolve(results[0].globalId)
                                 } else {
                                     reject('No global CDT defined')
@@ -175,7 +153,6 @@ export default class Provider {
      * @returns {Promise<Object>} The global CDT
      */
     getGlobalCdt () {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             globalCdtModel
                 .find({})
@@ -187,9 +164,6 @@ export default class Provider {
                         reject(err)
                     }
                     if (results.length === 1) {
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getGlobalCdt', 'DB', start)
-                        }
                         resolve(results[0].globalId)
                     } else {
                         reject('No global CDT defined')
@@ -211,7 +185,6 @@ export default class Provider {
      * @returns {Promise<Object>} Returns the service and operation schema
      */
     getServiceByOperationId (idOperation) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(idOperation) && !_.isEmpty(idOperation)) {
                 operationModel
@@ -222,9 +195,6 @@ export default class Provider {
                     .exec((err, results) => {
                         if (err) {
                             reject(err)
-                        }
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getServiceByOperationId', 'DB', start)
                         }
                         resolve(results[0])
                     })
@@ -241,7 +211,6 @@ export default class Provider {
      * @returns {Promise<Array>} Returns the service list with only the requested operations
      */
     getServicesByOperationIds (idOperations) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(idOperations) && !_.isEmpty(idOperations)) {
                 operationModel
@@ -251,9 +220,6 @@ export default class Provider {
                     .exec((err, results) => {
                         if (err) {
                             reject(err)
-                        }
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getServicesByOperationIds', 'DB', start)
                         }
                         resolve(results)
                     })
@@ -278,7 +244,6 @@ export default class Provider {
      * @returns {Promise<Array>} The list of operation id, with ranking and weight, of the found services
      */
     filterPrimaryServices (idCDT, attributes) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(idCDT) && !_.isUndefined(attributes) && !_.isEmpty(attributes)) {
                 let clause = {
@@ -301,9 +266,6 @@ export default class Provider {
                     .toArray((err, results) => {
                         if (err) {
                             reject(err)
-                        }
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'filterPrimaryServices', 'DB', start)
                         }
                         resolve(results)
                     })
@@ -337,7 +299,6 @@ export default class Provider {
      * @returns {Promise<Array>} The list of services found, with the number of constraints defined for each operation and the count of constraint that are satisfied
      */
     filterSupportServices (idCDT, category, attributes) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(idCDT) && !_.isUndefined(attributes) && !_.isEmpty(attributes) && !_.isUndefined(category)) {
                 let clause = {
@@ -358,9 +319,6 @@ export default class Provider {
                         if (err) {
                             reject(err)
                         }
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'filterSupportServices', 'DB', start)
-                        }
                         resolve(results)
                     })
             } else {
@@ -377,7 +335,6 @@ export default class Provider {
      * @returns {Promise<Array>} The list of services identifiers with associated the constraint count
      */
     getServicesConstraintCount (idCDT, category, idOperations) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
            if (!_.isUndefined(idCDT) && !_.isUndefined(category) && !_.isUndefined(idOperations) && !_.isEmpty(idOperations)) {
                const clause = {
@@ -393,9 +350,6 @@ export default class Provider {
                    .toArray((err, results) => {
                        if (err) {
                            reject(err)
-                       }
-                       if (this._metricsFlag) {
-                           this._metrics.record('Provider', 'getServicesConstraintCount', 'DB', start)
                        }
                        resolve(results)
                    })
@@ -428,7 +382,6 @@ export default class Provider {
      * @returns {Promise<Object>} The user's details
      */
     getUser (mail, password) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(mail) && !_.isUndefined(password)) {
                 userModel
@@ -445,9 +398,6 @@ export default class Provider {
                             reject(err)
                         }
                         if (user.length === 1) {
-                            if (this._metricsFlag) {
-                                this._metrics.record('Provider', 'getUser', 'DB', start)
-                            }
                             resolve(user[0])
                         } else {
                             reject('Invalid mail or password')
@@ -466,7 +416,6 @@ export default class Provider {
      * @returns {Promise<Boolean>} If the function returns true, then the user is correctly logged into the system, otherwise returns an error message
      */
     checkUserLogin (mail, token) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             if (!_.isUndefined(mail) && !_.isUndefined(token)) {
                 userModel
@@ -484,9 +433,6 @@ export default class Provider {
                             reject(err)
                         }
                         if (results.length === 1) {
-                            if (this._metricsFlag) {
-                                this._metrics.record('Provider', 'checkUserLogin', 'DB', start)
-                            }
                             resolve(results[0])
                         } else {
                             reject('User not logged in')
@@ -504,7 +450,6 @@ export default class Provider {
      * @returns {Promise<Object>} The user's mashup if exists, otherwise returns the global mashup
      */
     getUserMashup (userId) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             mashupModel.collection
                 .find({_userId: ObjectId(userId)})
@@ -514,9 +459,6 @@ export default class Provider {
                         reject(err)
                     }
                     if (results.length === 1) {
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', 'getUserMashup', 'DB', start)
-                        }
                         resolve(results[0])
                     } else {
                         //get the global CDT
@@ -530,9 +472,6 @@ export default class Provider {
                                     reject(err)
                                 }
                                 if (results.length === 1) {
-                                    if (this._metricsFlag) {
-                                        this._metrics.record('Provider', 'getUserMashup', 'DB', start)
-                                    }
                                     resolve(results[0].mashupId)
                                 } else {
                                     reject('No global mashup defined')
@@ -560,7 +499,6 @@ export default class Provider {
      * @private
      */
     _searchByCoordinates (model, idCdt, node, metricsName) {
-        const start = process.hrtime()
         return new Promise ((resolve, reject) => {
             const radius = this._radius / 6371
             const latitude = _.result(_.find(node.fields, {name: 'Latitude'}), 'value')
@@ -578,9 +516,6 @@ export default class Provider {
                     .exec((err, results) => {
                         if (err) {
                             reject(err)
-                        }
-                        if (this._metricsFlag) {
-                            this._metrics.record('Provider', metricsName, 'DB', start)
                         }
                         resolve(results)
                     })

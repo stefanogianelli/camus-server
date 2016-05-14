@@ -39,7 +39,5 @@ app.listen(app.get('port'), () => {
     //print the server stats
     console.log('[INFO] Server listening on port ' + port)
     const debugStatus = config.get('debug') ? 'on' : 'off'
-    const metricsStatus = config.get('metrics') ? 'on' : 'off'
     console.log('[INFO] Debug is ' + debugStatus)
-    console.log('[INFO] Metrics are ' + metricsStatus)
 })

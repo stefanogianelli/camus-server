@@ -6,7 +6,7 @@ services:
   - mongodb
   - redis-server
 before_install:
-  - npm install -g pm2
+  - npm i pm2 -g
 before_script:
+  - pm2 updatePM2
   - sleep 20
-after_failure: "cat /home/travis/build/stefanogianelli/camus-server/npm-debug.log"

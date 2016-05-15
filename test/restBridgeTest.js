@@ -12,7 +12,7 @@ describe('Component: RestBridge', () => {
     describe('#executeQuery()', () => {
         it('check that correct response is returned', () => {
             return restBridge
-                .executeQuery(eventful, mockModel.decoratedCdt(1))
+                .executeQuery(eventful, mockModel.decoratedCdt(1), {})
                 .then(data => {
                     assert.notEqual(data, null)
                     assert.equal(data.response.total_items, 83)
@@ -31,21 +31,21 @@ describe('Component: RestBridge', () => {
         })
         it('check error when a required default parameter is not defined', () => {
             return restBridge
-                .executeQuery(noDefaultParameterService, mockModel.decoratedCdt(1))
+                .executeQuery(noDefaultParameterService, mockModel.decoratedCdt(1), {})
                 .catch(e => {
                     assert.equal(e, 'lack of required parameter \'app_key\'')
                 })
         })
         it('check error when a required parameter has no value in the CDT', () => {
             return restBridge
-                .executeQuery(noValueParameterService, mockModel.decoratedCdt(1))
+                .executeQuery(noValueParameterService, mockModel.decoratedCdt(1), {})
                 .catch(e => {
                     assert.equal(e, 'lack of required parameter \'location\'')
                 })
         })
         it('check error when the service does not respond', () => {
             return restBridge
-                .executeQuery(wrongBasePath, mockModel.decoratedCdt(1))
+                .executeQuery(wrongBasePath, mockModel.decoratedCdt(1), {})
                 .catch(e => {
                     assert.notEqual(e, null)
                 })

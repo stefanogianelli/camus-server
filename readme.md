@@ -1,7 +1,7 @@
 Project overview
 ========
 
-[![Build Status](https://travis-ci.org/stefanogianelli/camus-server.svg?branch=master)](https://travis-ci.org/stefanogianelli/camus-server)
+[![Build Status](https://travis-ci.org/stefanogianelli/camus-server.svg?branch=develop)](https://travis-ci.org/stefanogianelli/camus-server)
 
 CAMUS is a framework to allow creation of context-aware mashups. This repository provide the server's implementation of CAMUS prototype. It's used by the mobile app to perform contextual searches, starting from the user's situation. The server parse the context received by the application, then select the services that best fit this situation, based on pre-created rules. Once services are selected, they will be queried to acquire data to be sent to the client, after last steps of transformation and duplicates' cleaning.
 

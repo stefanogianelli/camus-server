@@ -9,3 +9,4 @@ before_install:
   - npm install -g pm2
 before_script:
   - sleep 20
+after_failure: "cat /home/travis/build/stefanogianelli/camus-server/npm-debug.log"

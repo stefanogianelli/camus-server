@@ -8,23 +8,22 @@ import {
     DiceCoefficient
 } from 'natural'
 
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
+
 /**
  * This class performs the necessary operations on the information received by the services. In particular two tasks are involved:
  * 1) duplicate detection: check the dataset to search duplicate entities. If some duplicates are found they will be merged in a unique item
  * 2) scoring: WIP
  */
-export default class {
+export default class ResponseAggregator {
 
     constructor () {
         //this threshold is used for identify a pair of items as similar. Greater value is better (0.9 means 90% similarity)
         this._threshold = 0.85
         if (config.has('similarity.threshold')) {
             this._threshold = config.get('similarity.threshold')
-        }
-        //initialize debug flag
-        this._debug = false
-        if (config.has('debug')) {
-            this._debug = config.get('debug')
         }
     }
 
@@ -79,9 +78,7 @@ export default class {
                         const sim = this._calculateObjectSimilarity(items[i], items[j])
                         //if the similarity is greater or equal of the threshold, then merge the two items
                         if (sim >= this._threshold) {
-                            if (this._debug) {
-                                console.log('Found similar items \'' + items[i].title + '\' and \'' + items[j].title + '\' (' + sim + ')')
-                            }
+                            logger.debug('[%s] Found similar items \'%s\' and \'%s\' (%s)', this.constructor.name, items[i].title, items[j].title, sim)
                             //merge the two items
                             if (items[i].meta.rank >= items[j].meta.rank) {
                                 items[i] = this._mergeItems(items[i], items[j])

@@ -19,5 +19,14 @@
     "threshold": 0.85
   },
   "paginationTTL": 1800,
-  "debug": true
+  "logger": {
+    "console": {
+      "level": "warn"
+    },
+    "file": {
+      "enable": true,
+      "level": "warn",
+      "fileName": "log.log"
+    }
+  }
 }

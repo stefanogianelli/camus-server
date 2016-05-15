@@ -6,6 +6,8 @@ import Promise from 'bluebird'
 import config from 'config'
 import Redis from 'ioredis'
 
+import Logger from '../utils/Logger'
+
 //load the models
 import {
     cdtModel,
@@ -28,6 +30,7 @@ import {
 const ObjectId = mongoose.Types.ObjectId
 
 let instance = null
+const logger = Logger.getInstance()
 
 /**
  * The Provider is used to collect all the methods that interacts with the databases.
@@ -51,10 +54,10 @@ export default class Provider {
         }
         //connect to the db
         mongoose.connect(this._dbUrl)
-        console.log('[INFO] Successfully connected to the database')
+        logger.debug('[%s] Successfully connected to the database', this.constructor.name)
         //define error logging
         mongoose.connection.on('error', function (err) {
-            console.log('[ERROR] Mongoose default connection error: ' + err)
+            logger.error('[%s] Mongoose default connection error: %s', this.constructor.name, err)
         })
         //acquire redis configuration
         this._redisAddress = 'localhost:6379'

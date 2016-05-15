@@ -8,7 +8,7 @@ import Provider from '../provider/provider'
 /**
  * This class handle the user's management methods
  */
-export default class {
+export default class UserManager {
 
     constructor () {
         this._provider = Provider.getInstance()

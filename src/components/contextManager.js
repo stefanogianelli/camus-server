@@ -2,14 +2,13 @@
 
 import _ from 'lodash'
 import Promise from 'bluebird'
-import config from 'config'
 
 import Provider from '../provider/provider'
 
 /**
  * The Context Manager receive the user's context and transform it in a 'decorated' version, more suitable for the next elaborations
  */
-export default class {
+export default class ContextManager {
     
     constructor () {
         //initialize provider

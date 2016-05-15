@@ -2,12 +2,15 @@
 
 import _ from 'lodash'
 import Promise from 'bluebird'
-import config from 'config'
+
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
 
 /**
  * This class handle the transformation of the results received from the service in the internal format, based on association with the semantic terms
  */
-export default class {
+export default class ResponseParser {
 
     /**
      * It transforms the response of the service to make it in internal representation
@@ -160,7 +163,7 @@ export default class {
                             i[f.onAttribute] = fn(i[f.onAttribute])
                         }
                     } catch (e) {
-                        console.log(e)
+                        logger.error('[%s] %s', this.constructor.name, e)
                     }
                 }
             })

@@ -5,20 +5,18 @@ import Promise from 'bluebird'
 import config from 'config'
 
 import Provider from '../provider/provider'
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
 
 /**
  * This component choose the most appropriate primary operations to be queried to retrieve the data
  */
-export default class  {
+export default class PrimaryServiceSelection  {
 
     constructor () {
         //initialize provider
         this._provider = Provider.getInstance()
-        //initialize debug flag
-        this._debug = false
-        if (config.has('debug')) {
-            this._debug = config.get('debug')
-        }
         //number of services to keep
         this._n = 3
         if (config.has('primaryService.n')) {
@@ -69,7 +67,7 @@ export default class  {
                     resolve(this._calculateRanking(_.concat(filter, ranking)))
                 })
                 .catch(e => {
-                    console.log('[ERROR]' + e)
+                    logger.error('[%s] %s', this.constructor.name, e)
                     resolve([])
                 })
         })
@@ -100,7 +98,7 @@ export default class  {
                 return _.flatten(results)
             })
             .catch(e => {
-                console.log(e)
+                logger.error('[%s] %s', this.constructor.name, e)
                 return []
             })
     }
@@ -112,9 +110,7 @@ export default class  {
      * @private
      */
     _calculateRanking (services) {
-        if (this._debug) {
-            console.log('Found ' + services.length + ' association/s')
-        }
+        logger.debug('[%s] Found %d association/s', this.constructor.name, services.length)
         let rankedList = []
         _(services).forEach(s => {
             //calculate the ranking of the current service
@@ -136,9 +132,7 @@ export default class  {
                 rankedList[index].rank += rank
             }
         })
-        if (this._debug) {
-            console.log('Found ' + rankedList.length + ' service/s')
-        }
+        logger.debug('[%s] Found %d service/s', this.constructor.name, rankedList.length)
         //sort the list by the rank in descending order and take only the first N services
         rankedList = _(rankedList)
             .orderBy('rank', 'desc')
@@ -159,9 +153,7 @@ export default class  {
         return this._provider
             .searchPrimaryByCoordinates(idCdt, node)
             .then(results => {
-                if (this._debug) {
-                    console.log('Found ' + results.length + ' service/s near the position')
-                }
+                logger.debug('[%s] Found %d service/s near the position', this.constructor.name, results.length)
                 return results
             })
             .map((result, index) => {

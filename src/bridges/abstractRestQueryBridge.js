@@ -8,12 +8,15 @@ import config from 'config'
 import Bridge from './bridgeInterface'
 import Provider from '../provider/provider'
 import * as Composer from '../utils/QueryComposer'
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
 
 /**
  * Abstract bridge implementation for REST and Query services
  * It's not a real abstract class, but a specific classes for rest and query types are needed due to reflect the bridgeName attribute definition
  */
-export default class extends Bridge {
+export default class AbstractRestQueryBridge extends Bridge {
 
     constructor () {
         super()
@@ -29,11 +32,6 @@ export default class extends Bridge {
         }
         //initialize provider
         this._provider = Provider.getInstance()
-        //initialize debug flag
-        this._debug = false
-        if (config.has('debug')) {
-            this._debug = config.get('debug')
-        }
     }
 
     /**
@@ -73,9 +71,7 @@ export default class extends Bridge {
         } catch (err) {
             return Promise.reject(err.message)
         }
-        if (this._debug) {
-            console.log('Querying service \'' + descriptor.service.name + '\': ' + fullAddress)
-        }
+        logger.info('[%s] Querying service \'%s\': %s', this.constructor.name, descriptor.service.name, fullAddress)
         return this
             ._makeCall(fullAddress, descriptor.headers, descriptor.service.name)
             .then(response => {
@@ -186,7 +182,7 @@ export default class extends Bridge {
                         hasNextPage = true
                     }
                 } catch (e) {
-                    console.log('Invalid page count value')
+                    logger.warn('Invalid page count value')
                 }
             } else if (paginationConfig.type === 'token') {
                 //get the next token

@@ -3,10 +3,14 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
+
 /**
  * This class manages the data saved in cache and, if necessary, it performs new queries to the services to retrieve more data
  */
-export default class {
+export default class SessionHelper {
 
     constructor (queryHandler, responseAggregator) {
         this._queryHandler = queryHandler
@@ -53,9 +57,9 @@ export default class {
                     userInfo.itemSeen = first
                 }
                 //I have enough data to show
-                console.log('[INFO] The system has enough data to be shown')
+                logger.info('[%s] The system has enough data to be shown', this.constructor.name)
             } else {
-                console.log('[INFO] Needed re-fetching of data')
+                logger.info('[%s] Needed re-fetching of data', this.constructor.name)
                 //need re-fetching of the services
                 let serviceList = cachedObject.services
                 //maintain only the services with another page to show
@@ -93,7 +97,7 @@ export default class {
             }
         } else {
             //return the full result set
-            console.log('[INFO] No pagination setting specified')
+            logger.info('[%s] No pagination setting specified', this.constructor.name)
         }
         //wait for completion
         return Promise

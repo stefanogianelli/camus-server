@@ -6,6 +6,10 @@ import graphqlHTTP from 'express-graphql'
 import config from 'config'
 import _ from 'lodash'
 
+import Logger from './utils/Logger'
+
+const logger = Logger.getInstance()
+
 import {
     camusSchema
 } from './models/graphql/rootSchema'
@@ -37,7 +41,5 @@ app.set('port', port)
 //start the server
 app.listen(app.get('port'), () => {
     //print the server stats
-    console.log('[INFO] Server listening on port ' + port)
-    const debugStatus = config.get('debug') ? 'on' : 'off'
-    console.log('[INFO] Debug is ' + debugStatus)
+    logger.info('Server listening on port %s', port)
 })

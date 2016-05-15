@@ -19,6 +19,7 @@ import ResponseAggregator from './responseAggregator'
 import UserManager from './userManager'
 import Provider from '../provider/provider'
 import SessionHelper from './sessionHelper'
+import Logger from '../utils/Logger'
 
 const contextManager = new ContextManager()
 const primaryService = new PrimaryService()
@@ -31,7 +32,7 @@ const provider = Provider.getInstance()
 
 const ObjectId = mongoose.Types.ObjectId
 
-let timer = null
+const logger = Logger.getInstance()
 
 let sessionExpiration = 1800
 if (config.has('paginationTTL')) {
@@ -98,7 +99,7 @@ export function getPrimaryData (userMail, contextHash, decoratedCdt, paginationA
         .then(result => {
             if (result) {
                 //object found in cache
-                console.log('[INFO] Retrieve results from cache')
+                logger.info('Retrieve results from cache')
                 return sessionHelper
                     .resolveResults(userMail, JSON.parse(result), paginationArgs)
                     .then(response => {

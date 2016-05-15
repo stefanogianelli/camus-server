@@ -2,15 +2,17 @@
 
 import _ from 'lodash'
 import Promise from 'bluebird'
-import config from 'config'
 
 import Provider from '../provider/provider'
 import * as Composer from '../utils/QueryComposer'
+import Logger from '../utils/Logger'
+
+const logger = Logger.getInstance()
 
 /**
  * This class chooses the most appropriate support services to be used in the current context.
  */
-export default class {
+export default class SupportServiceSelection {
 
     constructor () {
         //initialize provider
@@ -26,7 +28,7 @@ export default class {
         return this
             ._selectServiceFromCategory(decoratedCdt.supportServiceCategories, decoratedCdt)
             .catch(err => {
-                console.log('[ERROR] ' + err)
+                logger.error('[%s] %s', this.constructor.name, err)
                 return []
             })
     }

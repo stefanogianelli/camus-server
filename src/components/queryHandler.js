@@ -2,17 +2,19 @@
 
 import _ from 'lodash'
 import Promise from 'bluebird'
-import config from 'config'
 import loader from 'require-all'
 
 import Provider from '../provider/provider'
 import ResponseParser from './responseParser'
+import Loggger from '../utils/Logger'
+
+const logger = Loggger.getInstance()
 
 /**
  * The Query Handler receives the list of services to be queried and call the most appropriate bridge to complete this task.
  * After a response is received, it handles the transformation in the 'semantic term' form.
  */
-export default class {
+export default class QueryHandler {
 
     constructor () {
         //initialize components
@@ -98,7 +100,7 @@ export default class {
         }
         let bridge = _(this._bridges).get(bridgeName)
         if (_.isUndefined(bridge)) {
-            console.log('Invalid bridge \''.concat(bridgeName).concat(' \''))
+            logger.warn('[%s] Invalid bridge \'%s\'', this.constructor.name, bridgeName)
             return Promise.resolve([])
         } else {
             const bridgeInstance = new bridge.default()
@@ -118,7 +120,7 @@ export default class {
                     }
                 })
                 .catch(e => {
-                    console.log('[' + descriptor.service.name + '] ' + e)
+                    logger.error('[%s] Service \'%s\' error: %s', this.constructor.name, descriptor.service.name, e)
                     return Promise.resolve([])
                 })
         }

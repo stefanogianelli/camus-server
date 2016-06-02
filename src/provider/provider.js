@@ -224,6 +224,12 @@ export default class Provider {
                         if (err) {
                             reject(err)
                         }
+                        // reorder the results based on provided array
+                        // TODO: use a map reduce solution (http://stackoverflow.com/questions/22797768/does-mongodbs-in-clause-guarantee-order)
+                        results.sort((a, b) => {
+                            return _.findIndex(idOperations, id => a._id.equals(id)) -
+                                _.findIndex(idOperations, id => b._id.equals(id));
+                        })
                         resolve(results)
                     })
             } else {

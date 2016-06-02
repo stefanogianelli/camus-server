@@ -120,7 +120,7 @@ export default class QueryHandler {
                     }
                 })
                 .catch(e => {
-                    logger.error('[%s] Service \'%s\' error: %s', this.constructor.name, descriptor.service.name, e)
+                    logger.error('[%s] Service \'%s\': %s', this.constructor.name, descriptor.service.name, e.message)
                     return Promise.resolve([])
                 })
         }

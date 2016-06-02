@@ -32,6 +32,8 @@ export default class AbstractRestQueryBridge extends Bridge {
         }
         //initialize provider
         this._provider = Provider.getInstance()
+        // FIXME: resolve issue with certificate, need a better way to handle this case
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
     }
 
     /**

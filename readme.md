@@ -1,7 +1,7 @@
 Project overview
 ========
 
-[![Build Status](https://travis-ci.org/stefanogianelli/camus-server.svg?branch=develop)](https://travis-ci.org/stefanogianelli/camus-server)
+[![Build Status](https://travis-ci.org/stefanogianelli/camus-server.svg?branch=master)](https://travis-ci.org/stefanogianelli/camus-server)
 
 CAMUS is a framework to allow creation of context-aware mashups. This repository provide the server's implementation of CAMUS prototype. It's used by the mobile app to perform contextual searches, starting from the user's situation. The server parse the context received by the application, then select the services that best fit this situation, based on pre-created rules. Once services are selected, they will be queried to acquire data to be sent to the client, after last steps of transformation and duplicates' cleaning.
 
@@ -51,7 +51,17 @@ To get the docker machine's ip address execute the command:
 
 Note: get only the ip address becuase the mapped port for CAMUS remain 3001.
 
-For the first run assure to create the entries in the database using the /createDatabase endpoint
+### Create database
+
+It's possible to use the Database Populator tool inside a docker container. First step is retrieve the server container id. Execute the command
+
+    docker ps
+
+And get the id of the container named "server_app". The, to run the database tool, execute the command:
+
+    docker exec <container_id> node databasePopulator.js
+
+### Notes
 
 Note for MAC OS X users: if you get the error message:
 
